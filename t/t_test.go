@@ -52,7 +52,7 @@ func TestNext_EveryHourWithAt(test *testing.T) {
 // Tests every day at 21:*7
 func TestNext_EveryDayWithAtMinuteWildcard(test *testing.T) {
 	start := newTime(time.Now(), 0, 20, 30) // 20:30, 2 later at 01:50
-	w := &When{Every: Every(1).Days(), Day: Sun, At: "21:*7"}
+	w := &When{Every: Every(1).Days(), On: Sun, At: "21:*7"}
 	dur := w.Next(start)
 	if dur != 25*time.Hour+7*time.Minute {
 		test.Fatalf("next run should happen in 25h7m0s, found %v.", dur)
@@ -62,7 +62,7 @@ func TestNext_EveryDayWithAtMinuteWildcard(test *testing.T) {
 // Tests every day at **:10
 func TestNext_EveryDayWithAtHourWildcard(test *testing.T) {
 	start := newTime(time.Now(), 0, 0, 0) // 20:30, 2 later at 01:50
-	w := &When{Every: Every(1).Days(), Day: Sun, At: "**:10"}
+	w := &When{Every: Every(1).Days(), On: Sun, At: "**:10"}
 	dur := w.Next(start)
 	if dur != 24*time.Hour+10*time.Minute {
 		test.Fatalf("next run should happen in 24h10m0s, found %v.", dur)
@@ -72,7 +72,7 @@ func TestNext_EveryDayWithAtHourWildcard(test *testing.T) {
 // Tests every day at 01:50 and on Sunday (invalid).
 func TestNext_EveryDayWithAtAndDay(test *testing.T) {
 	start := newTime(time.Now(), 0, 20, 30) // 20:30, 2 later at 01:50
-	w := &When{Every: Every(2).Days(), Day: Sun, At: "01:50"}
+	w := &When{Every: Every(2).Days(), On: Sun, At: "01:50"}
 	dur := w.Next(start)
 	if dur != 53*time.Hour+20*time.Minute {
 		test.Fatalf("next run should happen in 53hr20min0sec, found %v.", dur)
@@ -83,7 +83,7 @@ func TestNext_EveryDayWithAtAndDay(test *testing.T) {
 func TestNext_EveryWithWeekAtAndDay(test *testing.T) {
 	start := newTime(time.Now(), 0, 0, 0)
 	weekdayDiff := int(math.Mod(float64(7+Sun-time.Now().Weekday()-1), 7))
-	w := &When{Every: Every(1).Weeks(), Day: Sun, At: "12:00"}
+	w := &When{Every: Every(1).Weeks(), On: Sun, At: "12:00"}
 	dur := w.Next(start)
 	hours := (7+weekdayDiff)*24 + 12
 	if dur != time.Duration(hours)*time.Hour {

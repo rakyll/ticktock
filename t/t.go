@@ -55,10 +55,10 @@ type Opts struct {
 // 		&When{Every: Every(1).Seonds()} // every seconds
 // 		&When{Every: Every(2).Hours(), At: "10:00"} // every two hour at 10am
 // 		&When{Every: Every(1).Hours(), At :"**:*5"} // every hour at the first *5 minute
-// 		&When{Every: Every(2).Weeks(), Day: Sun, At: "12:12"} // every 2 weeks on Sunday at 12:12
+// 		&When{Every: Every(2).Weeks(), On: Sun, At: "12:12"} // every 2 weeks on Sunday at 12:12
 type When struct {
 	Every *every
-	Day   int
+	On    int
 	At    string
 }
 
@@ -117,7 +117,7 @@ func (e *every) Weeks() *every {
 func (w *When) Next(start time.Time) time.Duration {
 	// handle if no Every
 	if w.Every == nil {
-		return nextDayAndAtMatch(start, w.Day, w.At)
+		return nextDayAndAtMatch(start, w.On, w.At)
 	}
 
 	var dur time.Duration
@@ -139,8 +139,8 @@ func (w *When) Next(start time.Time) time.Duration {
 	case tWeek:
 		// handle Day
 		weekdayDiff := 0
-		if w.Day != NoDay {
-			weekdayDiff = int(math.Mod(float64(7+w.Day-1-int(start.Weekday())), 7))
+		if w.On != NoDay {
+			weekdayDiff = int(math.Mod(float64(7+w.On-1-int(start.Weekday())), 7))
 		}
 		// Handle n
 		dur = (n*7 + time.Duration(weekdayDiff)) * 24 * time.Hour

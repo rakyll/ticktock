@@ -97,7 +97,7 @@ t.When{Every: t.Every(1).Hours(), At: "**:30"}
 t.When{Every: t.Every(1).Days(), At: "**:00"}
 
 // Every 2 weeks on Saturdays at 10:00
-t.When{Every: &t.Every(2).Weeks(), Day: t.Sat, At: "10:00"}
+t.When{Every: &t.Every(2).Weeks(), On: t.Sat, At: "10:00"}
 
 // Saturday at 15:00, not repeated
 t.When{Day: t.Sat, At: "15:00"}
