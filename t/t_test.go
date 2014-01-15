@@ -30,6 +30,22 @@ func TestNextDayAndAtMatch(test *testing.T) {
 	}
 }
 
+func TestNext_EachValid(test *testing.T) {
+	w := &When{Each: "2h5m"}
+	dur := w.Next(time.Now())
+	if dur != 2*time.Hour+5*time.Minute {
+		test.Fatalf("next run should happen in 2hrs5mins, found %v.", dur)
+	}
+}
+
+func TestNext_EachInvalid(test *testing.T) {
+	w := &When{Each: "2hm"}
+	dur := w.Next(time.Now())
+	if dur != 0 {
+		test.Fatalf("next run should happen in 0, found %v.", dur)
+	}
+}
+
 // Tests every 5 minutes.
 func TestNext_EveryMinutes(test *testing.T) {
 	w := &When{Every: Every(5).Minutes()}

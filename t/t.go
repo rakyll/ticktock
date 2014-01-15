@@ -56,7 +56,10 @@ type Opts struct {
 // 		&When{Every: Every(2).Hours(), At: "10:00"} // every two hour at 10am
 // 		&When{Every: Every(1).Hours(), At :"**:*5"} // every hour at the first *5 minute
 // 		&When{Every: Every(2).Weeks(), On: Sun, At: "12:12"} // every 2 weeks on Sunday at 12:12
+// 		&When{Each: "2h3m"} // every 2 hour and 3 minutes
 type When struct {
+	Each string // string parseable by time.ParseDuration
+
 	Every *every
 	On    int
 	At    string
@@ -115,6 +118,10 @@ func (e *every) Weeks() *every {
 
 // Duration from start to the next scheduled moment.
 func (w *When) Next(start time.Time) time.Duration {
+	if w.Each != "" {
+		dur, _ := time.ParseDuration(w.Each)
+		return dur
+	}
 	// handle if no Every
 	if w.Every == nil {
 		return nextDayAndAtMatch(start, w.On, w.At)
