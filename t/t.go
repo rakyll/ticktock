@@ -52,7 +52,7 @@ type Opts struct {
 
 // Represents timing for schedule jobs.
 // Examples:
-// 		&When{Every: Every(1).Seonds()} // every seconds
+// 		&When{Every: Every(1).Seconds()} // every seconds
 // 		&When{Every: Every(2).Hours(), At: "10:00"} // every two hour at 10am
 // 		&When{Every: Every(1).Hours(), At :"**:*5"} // every hour at the first *5 minute
 // 		&When{Every: Every(2).Weeks(), On: Sun, At: "12:12"} // every 2 weeks on Sunday at 12:12
