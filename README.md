@@ -10,6 +10,7 @@ ticktock.Schedule(
     "print-hello",
     &PrintJob{Msg: "Hello world"},
     &t.When{Every: t.Every(1).Seconds()})
+ticktock.Start()
 ~~~
 
 ## Usage
