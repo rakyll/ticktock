@@ -1,5 +1,7 @@
 # ticktock
 
+[![Build Status](https://travis-ci.org/rakyll/ticktock.png?branch=master)](https://travis-ci.org/rakyll/ticktock)
+
 ticktock is a cron job scheduler that allows you to define and run periodic jobs written in Golang. ticktock also optionally provides automatic job retry if the job has failed with an error. ticktock supports delayed and repeating jobs.
 
 ~~~ go
