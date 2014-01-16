@@ -4,6 +4,8 @@
 
 ticktock is a cron job scheduler that allows you to define and run periodic jobs written in Golang. ticktock also optionally provides automatic job retry if the job has failed with an error. ticktock supports delayed and repeating jobs.
 
+**Note: Work in progress, don't use it on prod yet.**
+
 ~~~ go
 // Schedule a job to email reminders once in every 3mins 10 secs.
 ticktock.Schedule("email-reminders", job, &t.When{Each: "3m10s"})
