@@ -15,7 +15,6 @@
 package jobs
 
 import (
-	"fmt"
 	"os/exec"
 )
 
