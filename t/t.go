@@ -58,7 +58,8 @@ type Opts struct {
 // 		&When{Every: Every(2).Weeks(), On: Sun, At: "12:12"} // every 2 weeks on Sunday at 12:12
 // 		&When{Each: "2h3m"} // every 2 hour and 3 minutes
 type When struct {
-	Each string // string parseable by time.ParseDuration
+	LastRun time.Time
+	Each    string // string parseable by time.ParseDuration
 
 	Every *every
 	On    int
@@ -118,6 +119,21 @@ func (e *every) Weeks() *every {
 
 // Duration from start to the next scheduled moment.
 func (w *When) Next(start time.Time) time.Duration {
+	var interval, diff time.Duration
+	interval = w.Duration(start)
+	for {
+		diff = start.Add(interval).Sub(time.Now())
+		if diff > 0 {
+			break
+		}
+		// fake the run in the past
+		// and look for the next run time in the future.
+		interval += w.Duration(start.Add(interval))
+	}
+	return diff
+}
+
+func (w *When) Duration(start time.Time) time.Duration {
 	if w.Each != "" {
 		dur, _ := time.ParseDuration(w.Each)
 		return dur

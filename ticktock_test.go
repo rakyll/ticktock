@@ -32,6 +32,15 @@ func (job *counterJob) Run() error {
 	return nil
 }
 
+type anyJob struct {
+	Fn func()
+}
+
+func (any *anyJob) Run() error {
+	any.Fn()
+	return nil
+}
+
 type errorJob struct {
 	count      int
 	errorAfter int
@@ -66,6 +75,7 @@ func TestSchedule_OntimeRepeating(test *testing.T) {
 	sh.Schedule("hi", job, &t.When{Every: t.Every(100).Milliseconds()})
 	time.AfterFunc(300*time.Millisecond, func() {
 		defer wg.Done()
+		sh.Cancel("hi")
 		if job.Count < 2 {
 			test.Fatalf("scheduler worked for %v, expected to run 3 times", job.Count)
 		}
@@ -104,6 +114,7 @@ func TestStart_AfterStart(test *testing.T) {
 	sh.Schedule("hi", job, &t.When{Every: t.Every(100).Milliseconds()})
 	time.AfterFunc(300*time.Millisecond, func() {
 		defer wg.Done()
+		sh.Cancel("hi")
 		if job.Count == 0 {
 			test.Fatalf("job is expected to run even though it's scheduled after Start, but it didn't")
 		}
@@ -166,4 +177,20 @@ func TestWhen_NotValid(test *testing.T) {
 	if err := sh.Schedule("hi", nil, &t.When{}); err == nil {
 		test.Fatalf("opts.When is not valid, but no error returned")
 	}
+}
+
+func TestWhen_LastRun(test *testing.T) {
+	start := time.Now()
+	sh := &Scheduler{}
+	lastRun := time.Now().Add(-1000 * time.Millisecond)
+	sh.Schedule("jobs-with-lastrun",
+		&anyJob{Fn: func() {
+			// should run in 100ms
+			diff := time.Now().Sub(start)
+			if diff > 205*time.Millisecond {
+				test.Errorf("Job expected to run in 200ms, but it happened in %v", diff)
+			}
+		}},
+		&t.When{LastRun: lastRun, Each: "300ms"})
+	sh.Start()
 }

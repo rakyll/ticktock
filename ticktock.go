@@ -80,7 +80,7 @@ func (s *Scheduler) ScheduleWithOpts(name string, job Job, opts *t.Opts) (err er
 	if _, ok := s.jobs[name]; ok {
 		return errors.New("a job already exists with the name provided")
 	}
-	if opts.When == nil || opts.When.Next(time.Now()) == 0 {
+	if opts.When == nil || opts.When.Duration(time.Now()) == 0 {
 		return errors.New("not a valid opts.When is provided")
 	}
 	if s.jobs == nil {
@@ -132,23 +132,25 @@ type jobC struct {
 	retryCount int
 	when       *t.When
 	forever    bool
-
-	timer *time.Timer
-
-	cancelSig chan bool
+	timer      *time.Timer
+	cancelSig  chan bool
 }
 
 func (j *jobC) schedule() {
 	select {
 	case <-j.cancelSig:
 		// TODO: cancel the timer
+		j.timer.Stop()
 		j.done()
 		return
 	default:
-		dur := j.when.Next(time.Now())
-		// TODO: handle duration=0
+		if j.when.LastRun.IsZero() {
+			j.when.LastRun = time.Now()
+		}
+		dur := j.when.Next(j.when.LastRun)
 		j.timer = time.AfterFunc(dur, func() {
 			j.run()
+			j.when.LastRun = time.Now()
 			if j.forever {
 				j.schedule()
 				return
