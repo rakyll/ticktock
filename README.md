@@ -103,6 +103,11 @@ t.When{Every: &t.Every(2).Weeks(), On: t.Sat, At: "10:00"}
 
 // Saturday at 15:00, not repeated
 t.When{Day: t.Sat, At: "15:00"}
+
+// Every week on Sun at 11:00, last run was explicitly given.
+// If your process shuts down at 10:00 on Sunday, it allows scheduler
+// to schedule the job to run in a hour on an immediate restart.
+t.When{LastRun: lastRun, Every: &t.Every(1).Weeks(), On: t.Sun, At: "10:00"}
 ~~~
 
 ## License
