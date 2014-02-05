@@ -55,14 +55,14 @@ func ScheduleWithOpts(name string, job Job, opts *t.Opts) (err error) {
 	return defaultScheduler.ScheduleWithOpts(name, job, opts)
 }
 
-// Cancels a scheduled job registed on the default scheduler.
-// If job it already running, waits for the run to be completed
+// Cancels a scheduled job registered on the default scheduler.
+// If job is already running, waits for the run to be completed
 // and cancels the next runs.
 func Cancel(name string) {
 	defaultScheduler.Cancel(name)
 }
 
-// Starts the jobs registed for the default scheduler.
+// Starts the jobs registered for the default scheduler.
 func Start() {
 	defaultScheduler.Start()
 }
