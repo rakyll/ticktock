@@ -91,7 +91,7 @@ func (s *Scheduler) ScheduleWithOpts(name string, job Job, opts *t.Opts) (err er
 		job:        job,
 		retryCount: opts.RetryCount,
 		when:       opts.When,
-		forever:    opts.When.Every != nil,
+		forever:    opts.When.Every != nil || opts.When.Each != "",
 		cancelSig:  make(chan bool),
 	}
 	if s.started {
