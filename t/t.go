@@ -121,7 +121,7 @@ func (e *every) Weeks() *every {
 func (w *When) Next(start time.Time) time.Duration {
 	var interval, diff time.Duration
 	interval = w.Duration(start)
-	for {
+	for interval > 0 {
 		diff = start.Add(interval).Sub(time.Now())
 		if diff > 0 {
 			break
