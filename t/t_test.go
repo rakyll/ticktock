@@ -33,8 +33,9 @@ func TestNextDayAndAtMatch(test *testing.T) {
 func TestNext_EachValid(test *testing.T) {
 	w := &When{Each: "2h5m"}
 	dur := w.Next(time.Now())
-	if dur != 2*time.Hour+5*time.Minute {
-		test.Fatalf("next run should happen in 2hrs5mins, found %v.", dur)
+	next := time.Now().Add(2*time.Hour + 5*time.Minute).Round(time.Second)
+	if !time.Now().Add(dur).Round(time.Second).Equal(next) {
+		test.Fatalf("next run should happen in %v, found %v.", -time.Since(next), dur)
 	}
 }
 
@@ -50,8 +51,9 @@ func TestNext_EachInvalid(test *testing.T) {
 func TestNext_EveryMinutes(test *testing.T) {
 	w := &When{Every: Every(5).Minutes()}
 	dur := w.Next(time.Now())
-	if dur != 5*time.Minute {
-		test.Fatalf("next run should happen in 5mins, found %v.", dur)
+	next := time.Now().Add(5 * time.Minute).Round(time.Second)
+	if !time.Now().Add(dur).Round(time.Second).Equal(next) {
+		test.Fatalf("next run should happen in %v, found %v.", -time.Since(next), dur)
 	}
 }
 
@@ -60,8 +62,12 @@ func TestNext_EveryHourWithAt(test *testing.T) {
 	now := newTime(time.Now(), 0, 0, 40)
 	w := &When{Every: Every(1).Hours(), At: "00:10"}
 	dur := w.Next(now)
-	if dur != time.Hour+30*time.Minute {
-		test.Fatalf("next run should happen in 1hr30mins, found %v.", dur)
+	next := newTime(time.Now(), 0, 1, 10)
+	if !time.Now().Before(now) {
+		next = next.Add(24 * time.Hour)
+	}
+	if !time.Now().Add(dur).Round(time.Second).Equal(next) {
+		test.Fatalf("next run should happen in %v, found %v.", -time.Since(next), dur)
 	}
 }
 
@@ -70,8 +76,12 @@ func TestNext_EveryDayWithAtMinuteWildcard(test *testing.T) {
 	start := newTime(time.Now(), 0, 20, 30) // 20:30, 2 later at 01:50
 	w := &When{Every: Every(1).Days(), On: Sun, At: "21:*7"}
 	dur := w.Next(start)
-	if dur != 25*time.Hour+7*time.Minute {
-		test.Fatalf("next run should happen in 25h7m0s, found %v.", dur)
+	next := newTime(time.Now().Add(24*time.Hour), 0, 21, 37)
+	if !time.Now().Before(start) {
+		next = next.Add(24 * time.Hour)
+	}
+	if !time.Now().Add(dur).Round(time.Second).Equal(next) {
+		test.Fatalf("next run should happen in %v, found %v.", -time.Since(next), dur)
 	}
 }
 
@@ -80,8 +90,12 @@ func TestNext_EveryDayWithAtHourWildcard(test *testing.T) {
 	start := newTime(time.Now(), 0, 0, 0) // 20:30, 2 later at 01:50
 	w := &When{Every: Every(1).Days(), On: Sun, At: "**:10"}
 	dur := w.Next(start)
-	if dur != 24*time.Hour+10*time.Minute {
-		test.Fatalf("next run should happen in 24h10m0s, found %v.", dur)
+	next := newTime(time.Now(), 0, 0, 10)
+	if !time.Now().Before(start) {
+		next = next.Add(24 * time.Hour)
+	}
+	if !time.Now().Add(dur).Round(time.Second).Equal(next) {
+		test.Fatalf("next run should happen in %v, found %v.", -time.Since(next), dur)
 	}
 }
 
@@ -90,20 +104,33 @@ func TestNext_EveryDayWithAtAndDay(test *testing.T) {
 	start := newTime(time.Now(), 0, 20, 30) // 20:30, 2 later at 01:50
 	w := &When{Every: Every(2).Days(), On: Sun, At: "01:50"}
 	dur := w.Next(start)
-	if dur != 53*time.Hour+20*time.Minute {
-		test.Fatalf("next run should happen in 53hr20min0sec, found %v.", dur)
+	untilNextSunday := time.Duration(7-time.Now().Weekday()) * time.Hour * 24
+	next := newTime(time.Now().Add(24*time.Hour), 0, 1, 50)
+	if untilNextSunday > 2*24*time.Hour {
+		next = next.Add(2 * 24 * time.Hour)
+	} else {
+		next = next.Add(untilNextSunday)
+	}
+	if !time.Now().Before(start) {
+		next = next.Add(24 * time.Hour)
+	}
+	if !time.Now().Add(dur).Round(time.Second).Equal(next) {
+		test.Fatalf("next run should happen in %v, found %v.", -time.Since(next), dur)
 	}
 }
 
-// Tests every week at 12:00 and on Sunday
+// Tests every week at 12:00 and on Sunday (invalid?).
 func TestNext_EveryWithWeekAtAndDay(test *testing.T) {
 	start := newTime(time.Now(), 0, 0, 0)
-	weekdayDiff := int(math.Mod(float64(7+Sun-time.Now().Weekday()-1), 7))
 	w := &When{Every: Every(1).Weeks(), On: Sun, At: "12:00"}
 	dur := w.Next(start)
-	hours := (7+weekdayDiff)*24 + 12
-	if dur != time.Duration(hours)*time.Hour {
-		test.Fatalf("next run should happen in 53hr20min0sec, found %v.", dur)
+	untilNextSunday := time.Duration(7-time.Now().Weekday()) * time.Hour * 24
+	next := newTime(time.Now(), 0, 12, 00).Add(untilNextSunday)
+	if !time.Now().Before(start) {
+		next = next.Add(7 * 24 * time.Hour)
+	}
+	if !time.Now().Add(dur).Round(time.Second).Equal(next) {
+		test.Fatalf("next run should happen in %v, found %v.", -time.Since(next), dur)
 	}
 }
 
